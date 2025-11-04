@@ -1,0 +1,91 @@
+fs = 48000;
+% src = mono audio file
+%room = stlread("D:\Downloads|room.stl");
+% dimensions in meters
+% 2.6416 = y = length = 104
+% 2.9972 = z = height = 118
+% 2.8666 = x = width = 112.85 in
+
+%Effective absorption for
+
+%% Assume 'room' is your original STL triangulation object
+
+% Step 1: Extract points and faces
+points = room.Points;            
+faces  = room.ConnectivityList;  
+
+% Step 2: Current dimensions
+minCoords = min(points);
+maxCoords = max(points);
+dims = maxCoords - minCoords;   % [X, Y, Z]
+disp('Current dimensions [X, Y, Z]:')
+disp(dims)
+
+% Step 3: Desired dimensions
+% Keep axis order the same: X, Y, Z
+targetDims = [2.1082, 2.6416, 2.9972];  % [X, Y, Z]
+
+% Step 4: Compute scaling factors per axis
+scaleFactors = targetDims ./ dims;
+
+% Step 5: Apply scaling
+points = points .* scaleFactors;
+
+% Step 6: Rebuild triangulation
+roomFinal = triangulation(faces, points);
+
+% Step 7: Visualize transparent
+figure
+trisurf(roomFinal, ...
+        'FaceColor', 'cyan', ...
+        'FaceAlpha', 0.3, ...
+        'EdgeColor', 'k');
+axis equal
+xlabel('X')
+ylabel('Y')
+zlabel('Z')
+title('Rescaled Room STL (No Reordering)')
+view(3)
+camlight
+lighting gouraud
+
+% Save STL using triangulation object directly
+stlwrite(roomFinal, "room_rescaled_no_reorder.stl");
+disp("STL saved as 'room_rescaled_no_reorder.stl'");
+
+
+
+
+function visualizeGeneralRoom(tri,txinates,rxinates)
+figure;
+trisurf(tri, ...
+    'FaceAlpha', 0.3, ...
+    'FaceColor', [.5 .5 .5], ...
+    'EdgeColor', 'none');
+view(60, 30);
+hold on; axis equal; grid off;
+xlabel('x'); ylabel('y'); zlabel('z');
+% Plot edges
+fe = featureEdges(tri,pi/20);
+numEdges = size(fe, 1);
+pts = tri.Points;
+a = pts(fe(:,1),:); 
+b = pts(fe(:,2),:); 
+fePts = cat(1, reshape(a, 1, numEdges, 3), ...
+           reshape(b, 1, numEdges, 3), ...
+           nan(1, numEdges, 3));
+fePts = reshape(fePts, [], 3);
+plot3(fePts(:, 1), fePts(:, 2), fePts(:, 3), 'k', 'LineWidth', .5); 
+
+hold on
+tx = txinates;
+rx = rxinates;
+scatter3(tx(1), tx(2), tx(3), 'sb', 'filled');
+scatter3(rx(1,1), rx(1,2), rx(1,3), 'sr', 'filled');
+end
+
+t = [0,0,0];
+r = [0,0,0];
+
+figure;
+visualizeGeneralRoom(roomFinal,t,r);
