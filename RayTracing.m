@@ -1,17 +1,21 @@
 fs = 48000;
 % src = mono audio file
 room = stlread("D:\Matlab_Projects\RayTracedAudio\room.stl");
+src = audioread("Clave_Mono.wav");
 % dimensions in meters
 % 2.6416 = y = length = 104
 % 2.9972 = z = height = 118
 % 2.8666 = x = width = 112.85 in
+
+
+
 
 %Effective absorption for entire wall instead of every object on wall
 
 
 
 %%
-% Rescale room size to be correct
+% % Rescale room size to be correct
 % % Step 1: Extract points and faces
 % points = room.Points;            
 % faces  = room.ConnectivityList;  
@@ -53,7 +57,7 @@ room = stlread("D:\Matlab_Projects\RayTracedAudio\room.stl");
 % 
 % % Save STL using triangulation object directly
 % stlwrite(roomFinal, "room_rescaled_no_reorder.stl");
-% disp("STL saved as 'room_rescaled_no_reorder.stl'");
+%disp("STL saved as 'room_rescaled_no_reorder.stl'");
 %%
 
 function visualizeGeneralRoom(tri,txinates,rxinates)
@@ -84,8 +88,11 @@ scatter3(tx(1), tx(2), tx(3), 'sb', 'filled');
 scatter3(rx(1,1), rx(1,2), rx(1,3), 'sr', 'filled');
 end
 
+x = 1.0287;
+y = 0.9398;
+z = 1.4986;
 t = [0,0,0];
-r = [0,0,0];
-
-
+r = [x,y,z];
 visualizeGeneralRoom(roomFinal,t,r);
+
+% For 180 deg t = [0,0.9398,1.4986
