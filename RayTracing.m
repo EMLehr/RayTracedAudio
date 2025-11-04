@@ -1,6 +1,6 @@
 fs = 48000;
 % src = mono audio file
-%room = stlread("D:\Downloads|room.stl");
+room = stlread("D:\Matlab_Projects\RayTracedAudio\room.stl");
 % dimensions in meters
 % 2.6416 = y = length = 104
 % 2.9972 = z = height = 118
@@ -8,53 +8,53 @@ fs = 48000;
 
 %Effective absorption for entire wall instead of every object on wall
 
-%% Assume 'room' is your original STL triangulation object
-
-% Step 1: Extract points and faces
-points = room.Points;            
-faces  = room.ConnectivityList;  
-
-% Step 2: Current dimensions
-minCoords = min(points);
-maxCoords = max(points);
-dims = maxCoords - minCoords;   % [X, Y, Z]
-disp('Current dimensions [X, Y, Z]:')
-disp(dims)
-
-% Step 3: Desired dimensions
-% Keep axis order the same: X, Y, Z
-targetDims = [2.1082, 2.6416, 2.9972];  % [X, Y, Z]
-
-% Step 4: Compute scaling factors per axis
-scaleFactors = targetDims ./ dims;
-
-% Step 5: Apply scaling
-points = points .* scaleFactors;
-
-% Step 6: Rebuild triangulation
-roomFinal = triangulation(faces, points);
-
-% Step 7: Visualize transparent
-figure
-trisurf(roomFinal, ...
-        'FaceColor', 'cyan', ...
-        'FaceAlpha', 0.3, ...
-        'EdgeColor', 'k');
-axis equal
-xlabel('X')
-ylabel('Y')
-zlabel('Z')
-title('Rescaled Room STL (No Reordering)')
-view(3)
-camlight
-lighting gouraud
-
-% Save STL using triangulation object directly
-stlwrite(roomFinal, "room_rescaled_no_reorder.stl");
-disp("STL saved as 'room_rescaled_no_reorder.stl'");
 
 
-
+%%
+% Rescale room size to be correct
+% % Step 1: Extract points and faces
+% points = room.Points;            
+% faces  = room.ConnectivityList;  
+% 
+% % Step 2: Current dimensions
+% minCoords = min(points);
+% maxCoords = max(points);
+% dims = maxCoords - minCoords;   % [X, Y, Z]
+% disp('Current dimensions [X, Y, Z]:')
+% disp(dims)
+% 
+% % Step 3: Desired dimensions
+% % Keep axis order the same: X, Y, Z
+% targetDims = [2.1082, 2.6416, 2.9972];  % [X, Y, Z]
+% 
+% % Step 4: Compute scaling factors per axis
+% scaleFactors = targetDims ./ dims;
+% 
+% % Step 5: Apply scaling
+% points = points .* scaleFactors;
+% 
+% % Step 6: Rebuild triangulation
+% roomFinal = triangulation(faces, points);
+% 
+% % Step 7: Visualize transparent
+% figure
+% trisurf(roomFinal, ...
+%         'FaceColor', 'cyan', ...
+%         'FaceAlpha', 0.3, ...
+%         'EdgeColor', 'k');
+% axis equal
+% xlabel('X')
+% ylabel('Y')
+% zlabel('Z')
+% title('Rescaled Room STL (No Reordering)')
+% view(3)
+% camlight
+% lighting gouraud
+% 
+% % Save STL using triangulation object directly
+% stlwrite(roomFinal, "room_rescaled_no_reorder.stl");
+% disp("STL saved as 'room_rescaled_no_reorder.stl'");
+%%
 
 function visualizeGeneralRoom(tri,txinates,rxinates)
 figure;
@@ -87,5 +87,5 @@ end
 t = [0,0,0];
 r = [0,0,0];
 
-figure;
+
 visualizeGeneralRoom(roomFinal,t,r);
