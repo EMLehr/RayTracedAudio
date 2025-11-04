@@ -113,12 +113,17 @@ visualizeGeneralRoom(roomFinal,t,r);
 
 % Absorption Coefficients
 freq = [125,250,500,1000,2000,4000];
-% floor_A = [0.1,0.15,0.25,0.3,0.3,0.3];
-% wall_panel_A = [0.11,0.4,0.7,0.74,0.88,0.89];
-% wall_drywall_A = [0.31,0.33,0.14,0.1,0.1,0.12];
-% wall_window_A = [0.12,0.06,0.04,0.03,0.02,0.02];
-% wall_door_A = [0.35,0.39,0.44,0.49,0.54,0.57];
-% ceiling_A = [0.45,0.7,0.8,0.8,0.65,0.45];
+% thin carpet over thin felt on concrete floor_A = [0.1,0.15,0.25,0.3,0.3,0.3];
+% acoustic banner wall_panel_A = [0.11,0.4,0.7,0.74,0.88,0.89];
+% painted plaster surface on masonry wall wall_drywall_A = [0.02,0.02,0.02,0.02,0.02,0.02];
+% 6mm glass wall_window_A = [0.12,0.06,0.04,0.03,0.02,0.02];
+% acoustic door wall_door_A = [0.35,0.39,0.44,0.49,0.54,0.57];
+% gypsum plaster tiles ceiling_A = [0.45,0.7,0.8,0.8,0.65,0.45];
+
+% Scatter Coeff
+% panel = [0.25, 0.35, 0.45, 0.55, 0.65, 0.75];
+% door = [0.05 0.07 0.10 0.15 0.20 0.25];
+
 
 % Room dimensions [2.1082, 2.6416,2.9667]
 % Left wall calcs: sound panel area 2.16294 * 2.6416 = 5.7136
@@ -129,28 +134,51 @@ freq = [125,250,500,1000,2000,4000];
 % ((.809212-.144438)*(2.67391-.639982))+((2.05271-1.25454)*(2.16651-.208892))+((2.06766-1.39162)*(2.86026-2.16294))
 % = 3.386
 % Backwall drywall = 2.9327
+% Right wall calcs:
+% Panel 1 = (1.4684-0.0118314)*(2.96562-2.2636) = 1.0225
+% panel 2 = (1.4684-0.962617)*(2.2308-0.882232) = 0.6821
+% Panel 3 =
+% ((2.6416-0.962617)*(0.868334-.008933998))-((2.6416-2.10029)*(0.796715-.00893398))
+% = 1.0165
+% Right wall total sound panels area = 2.7211
+% Right wall total area = 7.491
+% Right wall door area = (0.962617-0.0118314)*2.2636 = 2.1522
+%rightwall drywall area = 7.491 - 2.7211 - 2.1522 = 2.6177
+numFreqs = length(freq);
+
+
+function effAbs = calcEffectiveAbsorption(alpha, areas, totalArea, numFreqs)
+areas = areas(:);
+[m, f] = size(alpha);
+
+totalArea = sum(areas);
+
+effAbs = sum(alpha .* areas, 1)./totalArea;
+end
+
 
 % Effective absorption for back wall
-backwallAreas = [3.386, 2.9327]; % Panels, Drywall
-
 alpha = [
     0.11 0.4 0.7 0.74 0.88 0.89 % absorption coeff for sound panels
     0.31 0.33 0.14 0.1 0.1 0.12 % absorption coeff for drywall
     ];
 
-numFreqs = length(freq);
-effAbs_backWall = zeros(1,numFreqs);
-
-for n = 1:numFreqs
-    weightedSum = alpha(1,n) * backwallAreas(1) + alpha(2,n) * backwallAreas(2);
-    effAbs_backWall(n) = weightedSum/backwall;
-end
-
+backwallAreas = [3.386, 2.9327]; % Panels, Drywall
+effAbs_backWall = calcEffectiveAbsorption(alpha,backwallAreas,backwall, numFreqs);
 
 % Effective absorption for left wall
 leftwallAreas = [6.2332, 1.6842]; % Panels, drywall
-effAbs_leftWall = zeros(1,numFreqs);
-for n = 1:numFreqs
-    weightedSum = alpha(1,n) * leftwallAreas(1) + alpha(2,n) * leftwallAreas(2);
-    effAbs_leftWall(n) = weightedSum/leftwall;
-end
+effAbs_leftWall = calcEffectiveAbsorption(alpha,leftwallAreas,leftwall,numFreqs);
+
+% Eff Abs for right wall
+rightwallAreas = [2.7211, 2.6177, 2.1522]; % Panels, drywall, door
+alpha = [
+    0.11 0.4 0.7 0.74 0.88 0.89 % absorption coeff for sound panels
+    0.31 0.33 0.14 0.1 0.1 0.12 % absorption coeff for drywall
+    0.35 0.39 0.44 0.49 0.54 0.57 % abs for acoustic door
+    ];
+rightwall = 7.491; % adjusted for box taking up space
+effAbs_rightwall = calcEffectiveAbsorption(alpha,rightwallAreas,rightwall,numFreqs);
+
+
+
