@@ -98,6 +98,10 @@ y = 2.6416;
 z = 2.9972;
 ft2 = 0.6096;
 
+r_x = 1.016;
+r_y = 0.9398;
+r_z = 1.4986;
+
 frontwall = x*z;
 backwall = frontwall;
 leftwall = y*z;
@@ -105,14 +109,51 @@ rightwall = leftwall;
 ceiling = x*y;
 floor = ceiling;
 
-t = [0,0,0];
-r = [x,y,z];
-visualizeGeneralRoom(roomFinal,t,r);
+% 180 deg
+t = [r_x,r_y-ft2,r_z];
+r = [r_x,r_y,r_z];
+%visualizeGeneralRoom(roomFinal,t,r);
 
-% For 180 deg t = [x,y-ft2,z]
+
+% 0 deg
+t = [r_x,r_y+ft2,r_z];
+r = [r_x,r_y,r_z];
+%visualizeGeneralRoom(roomFinal,t,r);
+
+% -22.5 deg
+t = [r_x-ft2*sqrt(2-sqrt(2))/2,r_y+ft2*sqrt(2+sqrt(2))/2,r_z];
+r = [r_x,r_y,r_z];
+%visualizeGeneralRoom(roomFinal,t,r);
+
+
+% 45 deg
+t = [r_x+ft2*sqrt(2)/2,r_y-ft2*sqrt(2)/2,r_z];
+r = [r_x,r_y,r_z];
+%visualizeGeneralRoom(roomFinal,t,r);
+
+% -67.5 deg
+t = [r_x-ft2*sqrt(2+sqrt(2))/2,r_y+ft2*sqrt(2-sqrt(2))/2,r_z];
+r = [r_x,r_y,r_z];
+%visualizeGeneralRoom(roomFinal,t,r);
+
+
+% 112.5 deg
+t = [r_x+ft2*(sqrt(2+sqrt(2))/2),r_y-ft2*sqrt(2-sqrt(2))/2,r_z];
+r = [r_x,r_y,r_z];
+%visualizeGeneralRoom(roomFinal,t,r);
+
+% 135 deg
+t = [r_x+ft2*sqrt(2)/2,r_y-ft2*sqrt(2)/2,r_z];
+r = [r_x,r_y,r_z];
+%visualizeGeneralRoom(roomFinal,t,r);
+
+% -157.5 deg
+t = [r_x-ft2*(sqrt(2-sqrt(2))/2),r_y-ft2*sqrt(2+sqrt(2))/2,r_z];
+r = [r_x,r_y,r_z];
+%visualizeGeneralRoom(roomFinal,t,r);
+
 
 % Absorption Coefficients
-freq = [125,250,500,1000,2000,4000];
 % thin carpet over thin felt on concrete floor_A = [0.1,0.15,0.25,0.3,0.3,0.3];
 % acoustic banner wall_panel_A = [0.11,0.4,0.7,0.74,0.88,0.89];
 % painted plaster surface on masonry wall wall_drywall_A = [0.02,0.02,0.02,0.02,0.02,0.02];
@@ -144,9 +185,13 @@ freq = [125,250,500,1000,2000,4000];
 % Right wall total area = 7.491
 % Right wall door area = (0.962617-0.0118314)*2.2636 = 2.1522
 %rightwall drywall area = 7.491 - 2.7211 - 2.1522 = 2.6177
+
+freq = [125,250,500,1000,2000,4000];
 numFreqs = length(freq);
 
-
+% Calculates the effective absorption coefficients of a surface given the
+% individual abs coeff, areas of the individual surfaces, total area of the
+% surface, and num of freq that have a corresponding coeff
 function effAbs = calcEffectiveAbsorption(alpha, areas, totalArea, numFreqs)
 areas = areas(:);
 [m, f] = size(alpha);
