@@ -100,8 +100,8 @@ ft2 = 0.6096;
 
 w = 0.0254; % distance from center head to ear
 
-left_x = x - h; % left ear pos
-right_x = x-h;  % right ear pos
+left_x = x - w; % left ear pos
+right_x = x-w;  % right ear pos
 
 r_x = 1.016;
 r_y = 0.9398;
