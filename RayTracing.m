@@ -1,6 +1,6 @@
 fs = 48000;
 % src = mono audio file
-room = stlread("D:\Matlab_Projects\RayTracedAudio\room.stl");
+room = stlread("D:\Matlab Projects\raytracingproject\RayTracedAudio\room.stl");
 src = audioread("Clave_Mono.wav");
 % dimensions in meters
 % 2.6416 = y = length = 104
@@ -20,27 +20,27 @@ src = audioread("Clave_Mono.wav");
 % points = room.Points;            
 % faces  = room.ConnectivityList;  
 % 
-% % Step 2: Current dimensions
+% Step 2: Current dimensions
 % minCoords = min(points);
 % maxCoords = max(points);
 % dims = maxCoords - minCoords;   % [X, Y, Z]
 % disp('Current dimensions [X, Y, Z]:')
 % disp(dims)
 % 
-% % Step 3: Desired dimensions
-% % Keep axis order the same: X, Y, Z
+% Step 3: Desired dimensions
+% Keep axis order the same: X, Y, Z
 % targetDims = [2.1082, 2.6416, 2.9972];  % [X, Y, Z]
 % 
-% % Step 4: Compute scaling factors per axis
+% Step 4: Compute scaling factors per axis
 % scaleFactors = targetDims ./ dims;
 % 
-% % Step 5: Apply scaling
+% Step 5: Apply scaling
 % points = points .* scaleFactors;
 % 
-% % Step 6: Rebuild triangulation
+% Step 6: Rebuild triangulation
 % roomFinal = triangulation(faces, points);
 % 
-% % Step 7: Visualize transparent
+% Step 7: Visualize transparent
 % figure
 % trisurf(roomFinal, ...
 %         'FaceColor', 'cyan', ...
@@ -118,7 +118,7 @@ r = [r_x,r_y,r_z];
 % 0 deg
 t = [r_x,r_y+ft2,r_z];
 r = [r_x,r_y,r_z];
-%visualizeGeneralRoom(roomFinal,t,r);
+visualizeGeneralRoom(roomFinal,t,r);
 
 % -22.5 deg
 t = [r_x-ft2*sqrt(2-sqrt(2))/2,r_y+ft2*sqrt(2+sqrt(2))/2,r_z];
@@ -185,6 +185,11 @@ r = [r_x,r_y,r_z];
 % Right wall total area = 7.491
 % Right wall door area = (0.962617-0.0118314)*2.2636 = 2.1522
 %rightwall drywall area = 7.491 - 2.7211 - 2.1522 = 2.6177
+% Frontwall area
+% Box obstruction = 1.30145 * 0.796715 = 1.0369
+% Front wall door area = (2.06766 - 1.58012) * (1.86924) = 0.9113
+% Glass area = box area
+% front wall drywall area = 6.3187 - (0.9113 + 1.0369*2) = 3.3336
 
 freq = [125,250,500,1000,2000,4000];
 numFreqs = length(freq);
@@ -225,5 +230,16 @@ alpha = [
 rightwall = 7.491; % adjusted for box taking up space
 effAbs_rightwall = calcEffectiveAbsorption(alpha,rightwallAreas,rightwall,numFreqs);
 
+% Eff Abs for front wall
+frontwallAreas = [1.0369, 0.9113, 3.3336]; % window, door, drywall
+alpha = [
+    [0.12 0.06 0.04 0.03 0.02 0.02]
+    [0.35 0.39 0.44 0.49 0.54 0.57]
+    [0.02 0.02 0.02 0.02 0.02 0.02]
+    ];
+frontwall = backwall - 1.0369; %Adjusted for box
+effAbsfrontwall = calcEffectiveAbsorption(alpha,frontwallAreas,frontwall,numFreqs);
 
+effAbsfloor = [0.1,0.15,0.25,0.3,0.3,0.3];
 
+effAbsceiling = [0.45,0.7,0.8,0.8,0.65,0.45];
