@@ -1,7 +1,15 @@
 fs = 48000;
 % src = mono audio file
-room = stlread("D:\Matlab Projects\raytracingproject\RayTracedAudio\room.stl");
-src = audioread("Clave_Mono.wav");
+room = stlread("D:\Matlab_Projects\RayTracedAudio\STL_Files\room.stl");
+ceiling = stlread("STL_Files\ceiling.stl");
+floor = stlread("STL_Files\floor.stl");
+northWall = stlread("STL_Files\northwall.stl");
+southWall = stlread("STL_Files\southwall.stl");
+eastWall = stlread("STL_Files\eastwall.stl");
+westWall = stlread("STL_Files\westwall.stl");
+box = stlread("STL_Files\boxthing.stl");
+body = stlread("STL_Files\body.stl");
+src = audioread("Audio_Files\Clave_Mono.wav");
 % dimensions in meters
 % 2.6416 = y = length = 104
 % 2.9972 = z = height = 118
@@ -20,27 +28,27 @@ src = audioread("Clave_Mono.wav");
 % points = room.Points;            
 % faces  = room.ConnectivityList;  
 % 
-% Step 2: Current dimensions
+% %Step 2: Current dimensions
 % minCoords = min(points);
 % maxCoords = max(points);
 % dims = maxCoords - minCoords;   % [X, Y, Z]
 % disp('Current dimensions [X, Y, Z]:')
 % disp(dims)
 % 
-% Step 3: Desired dimensions
-% Keep axis order the same: X, Y, Z
+% %Step 3: Desired dimensions
+% %Keep axis order the same: X, Y, Z
 % targetDims = [2.1082, 2.6416, 2.9972];  % [X, Y, Z]
 % 
-% Step 4: Compute scaling factors per axis
+% %Step 4: Compute scaling factors per axis
 % scaleFactors = targetDims ./ dims;
 % 
-% Step 5: Apply scaling
+% %Step 5: Apply scaling
 % points = points .* scaleFactors;
 % 
-% Step 6: Rebuild triangulation
+% %Step 6: Rebuild triangulation
 % roomFinal = triangulation(faces, points);
 % 
-% Step 7: Visualize transparent
+% %Step 7: Visualize transparent
 % figure
 % trisurf(roomFinal, ...
 %         'FaceColor', 'cyan', ...
@@ -54,13 +62,15 @@ src = audioread("Clave_Mono.wav");
 % view(3)
 % camlight
 % lighting gouraud
-% 
+
 % % Save STL using triangulation object directly
 % stlwrite(roomFinal, "room_rescaled_no_reorder.stl");
 %disp("STL saved as 'room_rescaled_no_reorder.stl'");
 %%
 
+%% Dont touch this
 function visualizeGeneralRoom(tri,txinates,rxinates)
+
 figure;
 trisurf(tri, ...
     'FaceAlpha', 0.3, ...
@@ -87,8 +97,122 @@ rx = rxinates;
 scatter3(tx(1), tx(2), tx(3), 'sb', 'filled');
 scatter3(rx(1,1), rx(1,2), rx(1,3), 'sr', 'filled');
 end
+%%
+
+pts_body = body.Points;
+faces_body = body.ConnectivityList;
+
+%--- Step 1: Detect orientation and scale --------------------------------
+dimsBody = max(pts_body) - min(pts_body);
+disp("Original body dimensions [X Y Z] (in STL units):");
+disp(dimsBody)
+
+% Find the largest dimension (assumed to be height)
+[~, tallestAxis] = max(dimsBody);
+
+% Rotate if height isn't along Z
+switch tallestAxis
+    case 1 % height along X
+        R = [0 0 1; 0 1 0; -1 0 0]; % rotate so X→Z
+    case 2 % height along Y
+        R = [1 0 0; 0 0 1; 0 -1 0]; % rotate so Y→Z
+    otherwise
+        R = eye(3); % already upright
+end
+pts_body = (R * pts_body')';
+pts_body(:,3) = -pts_body(:,3);
+
+%--- Step 2: Convert from mm→m if necessary ------------------------------
+if max(dimsBody) > 3  % e.g., >3 meters → probably mm
+    pts_body = pts_body / 1000;
+end
+
+%--- Step 3b & 4: Scale body, then align head while keeping feet at z=0 ---
+minBody = min(pts_body);
+maxBody = max(pts_body);
+dimsBody = maxBody - minBody;
+
+% Target height
+targetHeight = 1.625; % meters
+scaleFactor = targetHeight / dimsBody(3);
+pts_body = pts_body * scaleFactor;
+
+% Recompute min/max after scaling
+minBody = min(pts_body);
+maxBody = max(pts_body);
+
+% Head center ~ear height below top
+headZ = maxBody(3);
+headCenter = [mean([minBody(1), maxBody(1)]), ...
+              mean([minBody(2), maxBody(2)]), ...
+              headZ - 0.09]; 
+
+% Desired head position
+r_x = 1.016; r_y = 0.9398; r_z = 1.4986;
+
+% Compute translation for head
+translation = [r_x, r_y, r_z] - headCenter;
+
+% Apply translation
+pts_body = pts_body + translation;
+
+% Finally, shift feet to z=0 if slightly below
+minZ = min(pts_body(:,3));
+pts_body(:,3) = pts_body(:,3) - minZ; % ensure feet sit on floor
 
 
+%--- Step 5: Visualize in room -------------------------------------------
+% bodyFinal = triangulation(faces_body, pts_body);
+% figure
+% trisurf(roomFinal, 'FaceColor', 'cyan', 'FaceAlpha', 0.2, 'EdgeColor', 'none'); hold on
+% trisurf(bodyFinal, 'FaceColor', 'magenta', 'FaceAlpha', 0.7, 'EdgeColor', 'none');
+% scatter3(r_x, r_y, r_z, 60, 'r', 'filled');
+% axis equal
+% xlabel('X'); ylabel('Y'); zlabel('Z');
+% title('Human Body Oriented and Positioned in Room')
+% view(3); camlight; lighting gouraud
+
+%--- Step 6: Save transformed body as a new STL ---------------------------
+ bodyFinal = triangulation(faces_body, pts_body);
+% outputPath = "STL_Files/body_transformed.stl";
+% stlwrite(bodyFinal, outputPath);
+% disp("Saved transformed body STL as " + outputPath);
+
+function visualizeGeneralRoomMultiple(triList, txinates, rxinates)
+% triList = cell array of triangulation objects
+figure; hold on; axis equal; grid off;
+xlabel('x'); ylabel('y'); zlabel('z');
+view(60, 30);
+
+faceColor = [0.5 0.5 0.5]; % same as visualizeGeneralRoom
+
+for k = 1:length(triList)
+    tri = triList{k};
+    trisurf(tri, 'FaceAlpha', 0.3, 'FaceColor', faceColor, 'EdgeColor', 'none');
+    
+    % Plot edges
+    fe = featureEdges(tri, pi/20);
+    pts = tri.Points;
+    a = pts(fe(:,1),:);
+    b = pts(fe(:,2),:);
+    numEdges = size(fe,1);
+    fePts = cat(1, reshape(a,1,numEdges,3), reshape(b,1,numEdges,3), nan(1,numEdges,3));
+    fePts = reshape(fePts,[],3);
+    plot3(fePts(:,1), fePts(:,2), fePts(:,3), 'k', 'LineWidth', 0.5);
+end
+
+% Plot transmitter and receiver
+scatter3(txinates(1), txinates(2), txinates(3), 'sb', 'filled');
+scatter3(rxinates(1,1), rxinates(1,2), rxinates(1,3), 'sr', 'filled');
+
+view(3); camlight; lighting gouraud;
+end
+
+
+triList = {
+    ceiling, floor, northWall, southWall, ...
+    eastWall, westWall, box, bodyFinal
+    };
 
 
 
@@ -98,13 +222,14 @@ y = 2.6416;
 z = 2.9972;
 ft2 = 0.6096;
 
-w = 0.0254; % distance from center head to ear
+w = 0.0254 * 3; % distance from center head to ear
 
-left_x = x - w; % left ear pos
+left_x = r_x - w; % left ear pos
 right_x = x-w;  % right ear pos
 
 r_x = 1.016;
-r_y = 0.9398;
+
+r_y = 0.955;
 r_z = 1.4986;
 
 frontwall = x*z;
@@ -114,16 +239,18 @@ rightwall = leftwall;
 ceiling = x*y;
 floor = ceiling;
 
+
 % 180 deg
-t = [r_x,r_y-ft2,r_z];
-r = [r_x,r_y,r_z];
+t = [r_x,r_y,r_z];
+r = [left_x,r_y,r_z];
 %visualizeGeneralRoom(roomFinal,t,r);
+visualizeGeneralRoomMultiple(triList,t,r);
 
 
 % 0 deg
 t = [r_x,r_y+ft2,r_z];
 r = [r_x,r_y,r_z];
-visualizeGeneralRoom(roomFinal,t,r);
+%visualizeGeneralRoom(roomFinal,t,r);
 
 % -22.5 deg
 t = [r_x-ft2*sqrt(2-sqrt(2))/2,r_y+ft2*sqrt(2+sqrt(2))/2,r_z];
@@ -248,3 +375,7 @@ effAbsfrontwall = calcEffectiveAbsorption(alpha,frontwallAreas,frontwall,numFreq
 effAbsfloor = [0.1,0.15,0.25,0.3,0.3,0.3];
 
 effAbsceiling = [0.45,0.7,0.8,0.8,0.65,0.45];
+
+% Via LLM
+% Scattering coeffs for materials
+% effScFloor = [0.1,0.15,0.2,0.25,0.3,0.35]
