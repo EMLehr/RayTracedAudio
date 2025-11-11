@@ -589,5 +589,367 @@ stereoSignal = [yLeft, yRight];
 stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
+
 sound(stereoSignal, fs);
 audiowrite("Audio_Files\Clave90.wav", stereoSignal, fs);
+
+%% 45 degrees
+angle = deg2rad(45);
+
+t = headCenter+ft2*[cos(angle), sin(angle), 0];
+
+
+r = [rightEar,r_y,r_z];
+visualizeGeneralRoomMultiple(triList,t,r);
+
+
+
+
+
+%% --- Convolve with right ear IR ---
+irRight = acousticRoomResponse(roomFinal, t, rightEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+    ReceiverRadius=0.09,...
+    NumStochasticRays=1e5);
+
+if size(irRight,2) > 1
+    irRight = mean(irRight,2);
+end
+
+yRight = conv(src, irRight);
+
+%% --- Convolve with left ear IR ---
+irLeft = acousticRoomResponse(roomFinal, t, leftEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+   ReceiverRadius=0.09,...
+   NumStochasticRays=1e5);
+
+if size(irLeft,2) > 1
+    irLeft = mean(irLeft,2);
+end
+
+yLeft = conv(src, irLeft);
+
+%% --- Match lengths ---
+len = max(length(yLeft), length(yRight));
+yLeft(end+1:len) = 0;
+yRight(end+1:len) = 0;
+
+%% --- Combine into stereo ---
+stereoSignal = [yLeft, yRight];
+
+%% --- Normalize stereo output to avoid clipping ---
+stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
+
+%% --- Play and save ---
+sound(stereoSignal, fs);
+audiowrite("Audio_Files\Clave45.wav", stereoSignal, fs);
+
+%% -22.5 degrees
+angle = deg2rad(112.5);
+
+t = headCenter+ft2*[cos(angle), sin(angle), 0];
+
+
+r = [rightEar,r_y,r_z];
+visualizeGeneralRoomMultiple(triList,t,r);
+
+
+
+
+
+%% --- Convolve with right ear IR ---
+irRight = acousticRoomResponse(roomFinal, t, rightEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+    ReceiverRadius=0.09,...
+    NumStochasticRays=1e5);
+
+if size(irRight,2) > 1
+    irRight = mean(irRight,2);
+end
+
+yRight = conv(src, irRight);
+
+%% --- Convolve with left ear IR ---
+irLeft = acousticRoomResponse(roomFinal, t, leftEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+   ReceiverRadius=0.09,...
+   NumStochasticRays=1e5);
+
+if size(irLeft,2) > 1
+    irLeft = mean(irLeft,2);
+end
+
+yLeft = conv(src, irLeft);
+
+%% --- Match lengths ---
+len = max(length(yLeft), length(yRight));
+yLeft(end+1:len) = 0;
+yRight(end+1:len) = 0;
+
+%% --- Combine into stereo ---
+stereoSignal = [yLeft, yRight];
+
+%% --- Normalize stereo output to avoid clipping ---
+stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
+
+%% --- Play and save ---
+sound(stereoSignal, fs);
+audiowrite("Audio_Files\Clave22_5.wav", stereoSignal, fs);
+
+%% 180 degrees
+angle = deg2rad(270);
+
+t = headCenter+ft2*[cos(angle), sin(angle), 0];
+
+
+r = [rightEar,r_y,r_z];
+visualizeGeneralRoomMultiple(triList,t,r);
+
+
+
+
+
+%% --- Convolve with right ear IR ---
+irRight = acousticRoomResponse(roomFinal, t, rightEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+    ReceiverRadius=0.09,...
+    NumStochasticRays=1e5);
+
+if size(irRight,2) > 1
+    irRight = mean(irRight,2);
+end
+
+yRight = conv(src, irRight);
+
+%% --- Convolve with left ear IR ---
+irLeft = acousticRoomResponse(roomFinal, t, leftEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+   ReceiverRadius=0.09,...
+   NumStochasticRays=1e5);
+
+if size(irLeft,2) > 1
+    irLeft = mean(irLeft,2);
+end
+
+yLeft = conv(src, irLeft);
+
+%% --- Match lengths ---
+len = max(length(yLeft), length(yRight));
+yLeft(end+1:len) = 0;
+yRight(end+1:len) = 0;
+
+%% --- Combine into stereo ---
+stereoSignal = [yLeft, yRight];
+
+%% --- Normalize stereo output to avoid clipping ---
+stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
+
+%% --- Play and save ---
+sound(stereoSignal, fs);
+audiowrite("Audio_Files\Clave180.wav", stereoSignal, fs);
+
+%% 112.5 degrees
+angle = deg2rad(-22.5);
+
+t = headCenter+ft2*[cos(angle), sin(angle), 0];
+
+
+r = [rightEar,r_y,r_z];
+visualizeGeneralRoomMultiple(triList,t,r);
+
+
+
+
+
+%% --- Convolve with right ear IR ---
+irRight = acousticRoomResponse(roomFinal, t, rightEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+    ReceiverRadius=0.09,...
+    NumStochasticRays=1e5);
+
+if size(irRight,2) > 1
+    irRight = mean(irRight,2);
+end
+
+yRight = conv(src, irRight);
+
+%% --- Convolve with left ear IR ---
+irLeft = acousticRoomResponse(roomFinal, t, leftEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+   ReceiverRadius=0.09,...
+   NumStochasticRays=1e5);
+
+if size(irLeft,2) > 1
+    irLeft = mean(irLeft,2);
+end
+
+yLeft = conv(src, irLeft);
+
+%% --- Match lengths ---
+len = max(length(yLeft), length(yRight));
+yLeft(end+1:len) = 0;
+yRight(end+1:len) = 0;
+
+%% --- Combine into stereo ---
+stereoSignal = [yLeft, yRight];
+
+%% --- Normalize stereo output to avoid clipping ---
+stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
+
+%% --- Play and save ---
+sound(stereoSignal, fs);
+audiowrite("Audio_Files\Clave112.wav", stereoSignal, fs);
+
+
+%% -67.5 degrees
+angle = deg2rad(157.5);
+
+t = headCenter+ft2*[cos(angle), sin(angle), 0];
+
+
+r = [rightEar,r_y,r_z];
+visualizeGeneralRoomMultiple(triList,t,r);
+
+
+
+
+
+%% --- Convolve with right ear IR ---
+irRight = acousticRoomResponse(roomFinal, t, rightEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+    ReceiverRadius=0.09,...
+    NumStochasticRays=1e5);
+
+if size(irRight,2) > 1
+    irRight = mean(irRight,2);
+end
+
+yRight = conv(src, irRight);
+
+%% --- Convolve with left ear IR ---
+irLeft = acousticRoomResponse(roomFinal, t, leftEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+   ReceiverRadius=0.09,...
+   NumStochasticRays=1e5);
+
+if size(irLeft,2) > 1
+    irLeft = mean(irLeft,2);
+end
+
+yLeft = conv(src, irLeft);
+
+%% --- Match lengths ---
+len = max(length(yLeft), length(yRight));
+yLeft(end+1:len) = 0;
+yRight(end+1:len) = 0;
+
+%% --- Combine into stereo ---
+stereoSignal = [yLeft, yRight];
+
+%% --- Normalize stereo output to avoid clipping ---
+stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
+
+%% --- Play and save ---
+sound(stereoSignal, fs);
+audiowrite("Audio_Files\Clave67.wav", stereoSignal, fs);
+
+%% -157.5 degrees
+angle = deg2rad(-112.5);
+
+t = headCenter+ft2*[cos(angle), sin(angle), 0];
+
+
+r = [rightEar,r_y,r_z];
+visualizeGeneralRoomMultiple(triList,t,r);
+
+
+
+
+
+%% --- Convolve with right ear IR ---
+irRight = acousticRoomResponse(roomFinal, t, rightEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+    ReceiverRadius=0.09,...
+    NumStochasticRays=1e5);
+
+if size(irRight,2) > 1
+    irRight = mean(irRight,2);
+end
+
+yRight = conv(src, irRight);
+
+%% --- Convolve with left ear IR ---
+irLeft = acousticRoomResponse(roomFinal, t, leftEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+   ReceiverRadius=0.09,...
+   NumStochasticRays=1e5);
+
+if size(irLeft,2) > 1
+    irLeft = mean(irLeft,2);
+end
+
+yLeft = conv(src, irLeft);
+
+%% --- Match lengths ---
+len = max(length(yLeft), length(yRight));
+yLeft(end+1:len) = 0;
+yRight(end+1:len) = 0;
+
+%% --- Combine into stereo ---
+stereoSignal = [yLeft, yRight];
+
+%% --- Normalize stereo output to avoid clipping ---
+stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
+
+%% --- Play and save ---
+sound(stereoSignal, fs);
+audiowrite("Audio_Files\Clave157.wav", stereoSignal, fs);
