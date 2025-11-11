@@ -2,7 +2,7 @@
 freq = [125,250,500,1000,2000,4000]; % Freq vals for absoprtion and scatter coeffs
 numFreqs = length(freq);
 fs = 48000;
-
+rng(0);
 % Absorption Coefficients via ""
 effAbsFloor = [0.1,0.15,0.25,0.3,0.3,0.3];
 effAbsPan = [0.11,0.4,0.7,0.74,0.88,0.89];
@@ -234,15 +234,16 @@ y = 2.6416;
 z = 2.9972;
 ft2 = 0.6096;
 
-w = 0.0254 * 3; % distance from center head to ear
+w = 0.0254 * 4; % distance from center head to ear
 
-left_x = r_x - w; % left ear pos
-right_x = x-w;  % right ear pos
 
 r_x = 1.016;
-
 r_y = 0.955;
 r_z = 1.4986;
+
+headCenter = [r_x,r_y,r_z];
+leftEar = headCenter + [-w,0,0];
+rightEar = headCenter + [w,0,0];
 
 frontwall = x*z;
 backwall = frontwall;
@@ -251,10 +252,9 @@ rightwall = leftwall;
 ceiling = x*y;
 floor = ceiling;
 
-
 % 180 deg
 t = [r_x,r_y,r_z];
-r = [left_x,r_y,r_z];
+r = [leftEar,r_y,r_z];
 %visualizeGeneralRoom(roomFinal,t,r);
 
 
@@ -287,7 +287,9 @@ r = [r_x,r_y,r_z];
 %visualizeGeneralRoom(roomFinal,t,r);
 
 % 135 deg
-t = [r_x+ft2*sqrt(2)/2,r_y-ft2*sqrt(2)/2,r_z];
+angle = deg2rad(135);
+
+t = headCenter+ft2*[cos(angle), sin(angle), 0];
 r = [r_x,r_y,r_z];
 %visualizeGeneralRoom(roomFinal,t,r);
 
@@ -371,7 +373,7 @@ alpha = [
     effAbsWall
     ];
 frontwall = backwall - 1.0369; %Adjusted for box
-effAbsfrontwall = calcEffective(alpha,frontwallAreas,frontwall,numFreqs);
+effAbs_frontwall = calcEffective(alpha,frontwallAreas,frontwall,numFreqs);
 
 %%
 
@@ -411,3 +413,181 @@ alpha = [
     ];
 
 effSc_frontWall = calcEffective(alpha,frontwallAreas,frontwall,numFreqs);
+
+
+%% Now for the simulation
+absCoeff = {effAbs_frontwall, effAbs_rightwall, effAbs_leftWall, effAbs_backWall, effAbsCeiling, effAbsFloor, effAbsBody, effAbsWall};
+ScCoeff = {effSc_frontWall, effSc_rightwall, effSc_leftWall, effSc_backWall, effScCeiling, effScFloor, effScBody, effScWall};
+%% 135 degrees
+angle = deg2rad(-45);
+
+t = headCenter+ft2*[cos(angle), sin(angle), 0];
+
+
+r = [rightEar,r_y,r_z];
+visualizeGeneralRoomMultiple(triList,t,r);
+
+
+allPoints = [];
+allConnectivity = [];
+faceMaterialIndex = [];  % store which material each face uses
+pointOffset = 0;
+
+materials = [1,2,3,4,5,6,7,8]; % just IDs for each surface in triList
+
+for k = 1:length(triList)
+    tri = triList{k};
+    pts = tri.Points;
+    conn = tri.ConnectivityList + pointOffset;
+    allPoints = [allPoints; pts];
+    allConnectivity = [allConnectivity; conn];
+    faceMaterialIndex = [faceMaterialIndex; repmat(materials(k), size(conn,1),1)];
+    pointOffset = size(allPoints,1);
+end
+
+roomFinal = triangulation(allConnectivity, allPoints);
+
+absCoeffMat = [effAbs_frontwall; effAbs_rightwall; effAbs_leftWall; ...
+               effAbs_backWall; effAbsCeiling; effAbsFloor; ...
+               effAbsBody; effAbsWall];  % 8x6 for 8 materials, 6 freqs
+
+scCoeffMat = [effSc_frontWall; effSc_rightwall; effSc_leftWall; ...
+               effSc_backWall; effScCeiling; effScFloor; ...
+               effScBody; effScWall];
+
+% Now map per-face using faceMaterialIndex
+numFaces = size(roomFinal.ConnectivityList,1);
+numFreqs = size(absCoeffMat,2);
+
+MaterialAbsorption = zeros(numFaces, numFreqs);
+MaterialScattering = zeros(numFaces, numFreqs);
+
+for f = 1:numFaces
+    matID = faceMaterialIndex(f);
+    MaterialAbsorption(f,:) = absCoeffMat(matID,:);
+    MaterialScattering(f,:) = scCoeffMat(matID,:);
+end
+
+[src, fs] = audioread("Audio_Files\Clave_Mono.wav");
+
+% Ensure mono
+if size(src,2) > 1
+    src = mean(src,2); % average channels into mono
+end
+
+
+%% --- Convolve with right ear IR ---
+irRight = acousticRoomResponse(roomFinal, t, rightEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+    ReceiverRadius = 0.09,...
+    NumStochasticRays=1e5);
+
+if size(irRight,2) > 1
+    irRight = mean(irRight,2);
+end
+
+yRight = conv(src, irRight);
+
+%% --- Convolve with left ear IR ---
+irLeft = acousticRoomResponse(roomFinal, t, leftEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+    ReceiverRadius=0.09,...
+    NumStochasticRays=1e5);
+
+if size(irLeft,2) > 1
+    irLeft = mean(irLeft,2);
+end
+
+yLeft = conv(src, irLeft);
+
+%% --- Match lengths ---
+len = max(length(yLeft), length(yRight));
+yLeft(end+1:len) = 0;
+yRight(end+1:len) = 0;
+
+%% --- Combine into stereo ---
+stereoSignal = [yLeft, yRight];
+
+%% --- Normalize stereo output to avoid clipping ---
+stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
+
+%% --- Play and save ---
+sound(stereoSignal, fs);
+audiowrite("Audio_Files\Clave135.wav", stereoSignal, fs);
+
+
+
+
+
+
+
+
+
+
+%% 90 degrees
+angle = deg2rad(0);
+
+t = headCenter+ft2*[cos(angle), sin(angle), 0];
+
+
+r = [rightEar,r_y,r_z];
+visualizeGeneralRoomMultiple(triList,t,r);
+
+
+
+
+
+%% --- Convolve with right ear IR ---
+irRight = acousticRoomResponse(roomFinal, t, rightEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+    ReceiverRadius=0.09,...
+    NumStochasticRays=1e5);
+
+if size(irRight,2) > 1
+    irRight = mean(irRight,2);
+end
+
+yRight = conv(src, irRight);
+
+%% --- Convolve with left ear IR ---
+irLeft = acousticRoomResponse(roomFinal, t, leftEar, ...
+    SampleRate=fs, ...
+    Algorithm="stochastic ray tracing", ...
+    BandCenterFrequencies=freq, ...
+    MaterialAbsorption=MaterialAbsorption, ...
+    MaterialScattering=MaterialScattering,...
+   ReceiverRadius=0.09,...
+   NumStochasticRays=1e5);
+
+if size(irLeft,2) > 1
+    irLeft = mean(irLeft,2);
+end
+
+yLeft = conv(src, irLeft);
+
+%% --- Match lengths ---
+len = max(length(yLeft), length(yRight));
+yLeft(end+1:len) = 0;
+yRight(end+1:len) = 0;
+
+%% --- Combine into stereo ---
+stereoSignal = [yLeft, yRight];
+
+%% --- Normalize stereo output to avoid clipping ---
+stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
+
+%% --- Play and save ---
+sound(stereoSignal, fs);
+audiowrite("Audio_Files\Clave90.wav", stereoSignal, fs);
