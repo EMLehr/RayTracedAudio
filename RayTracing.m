@@ -22,7 +22,7 @@ effScCeiling = [0.25, 0.35, 0.45, 0.55, 0.65, 0.75];
 effScBody = [0.3, 0.35, 0.45, 0.55, 0.6, 0.65];
 
 % STL files
-room = stlread("D:\Matlab_Projects\RayTracedAudio\STL_Files\room.stl");
+room = stlread("STL_Files\room.stl");
 ceiling = stlread("STL_Files\ceiling.stl");
 floor = stlread("STL_Files\floor.stl");
 northWall = stlread("STL_Files\northwall.stl");
@@ -233,7 +233,7 @@ x = 2.1082;
 y = 2.6416;
 z = 2.9972;
 %ft2 = 0.6096;
-ft2 = 0.8
+ft2 = 0.8;
 w = 0.0254 * 4; % distance from center head to ear
 
 
@@ -521,7 +521,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\Clave135.wav", stereoSignal, fs);
+audiowrite("Audio_Files\008meters\Clave135.wav", stereoSignal, fs);
 
 
 
@@ -584,7 +584,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\Clave45.wav", stereoSignal, fs);
+audiowrite("Audio_Files\008meters\Clave45.wav", stereoSignal, fs);
 
 %% -22.5 degrees
 angle = deg2rad(112.5);
@@ -644,7 +644,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\Clave22_5.wav", stereoSignal, fs);
+audiowrite("Audio_Files\008meters\Clave22.wav", stereoSignal, fs);
 
 %% 180 degrees
 180
@@ -705,7 +705,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\Clave180.wav", stereoSignal, fs);
+audiowrite("Audio_Files\008meters\Clave180.wav", stereoSignal, fs);
 
 %% 112.5 degrees
 112.5
@@ -766,7 +766,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\Clave112.wav", stereoSignal, fs);
+audiowrite("Audio_Files\008meters\Clave112.wav", stereoSignal, fs);
 
 
 %% -67.5 degrees
@@ -828,7 +828,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\Clave67.wav", stereoSignal, fs);
+audiowrite("Audio_Files\008meters\Clave67.wav", stereoSignal, fs);
 
 %% -157.5 degrees
 -157.5
@@ -889,4 +889,4 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\Clave157.wav", stereoSignal, fs);
+audiowrite("Audio_Files\008meters\Clave157.wav", stereoSignal, fs);
