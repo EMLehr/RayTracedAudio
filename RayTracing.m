@@ -233,7 +233,7 @@ x = 2.1082;
 y = 2.6416;
 z = 2.9972;
 %ft2 = 0.6096;
-ft2 = 0.8;
+ft2 = 0.7;
 w = 0.0254 * 4; % distance from center head to ear
 
 
@@ -521,7 +521,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\008meters\Clave135.wav", stereoSignal, fs);
+audiowrite("Audio_Files\007meters\Clave135.wav", stereoSignal, fs);
 
 
 
@@ -584,7 +584,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\008meters\Clave45.wav", stereoSignal, fs);
+audiowrite("Audio_Files\007meters\Clave45.wav", stereoSignal, fs);
 
 %% -22.5 degrees
 angle = deg2rad(112.5);
@@ -644,7 +644,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\008meters\Clave22.wav", stereoSignal, fs);
+audiowrite("Audio_Files\007meters\Clave22.wav", stereoSignal, fs);
 
 %% 180 degrees
 180
@@ -705,7 +705,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\008meters\Clave180.wav", stereoSignal, fs);
+audiowrite("Audio_Files\007meters\Clave180.wav", stereoSignal, fs);
 
 %% 112.5 degrees
 112.5
@@ -766,7 +766,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\008meters\Clave112.wav", stereoSignal, fs);
+audiowrite("Audio_Files\007meters\Clave112.wav", stereoSignal, fs);
 
 
 %% -67.5 degrees
@@ -828,7 +828,7 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\008meters\Clave67.wav", stereoSignal, fs);
+audiowrite("Audio_Files\007meters\Clave67.wav", stereoSignal, fs);
 
 %% -157.5 degrees
 -157.5
@@ -889,4 +889,4 @@ stereoSignal = stereoSignal / max(abs(stereoSignal(:)));
 
 %% --- Play and save ---
 sound(stereoSignal, fs);
-audiowrite("Audio_Files\008meters\Clave157.wav", stereoSignal, fs);
+audiowrite("Audio_Files\007meters\Clave157.wav", stereoSignal, fs);
