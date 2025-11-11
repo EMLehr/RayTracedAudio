@@ -1,5 +1,27 @@
+% Initialize variables
+freq = [125,250,500,1000,2000,4000]; % Freq vals for absoprtion and scatter coeffs
+numFreqs = length(freq);
 fs = 48000;
-% src = mono audio file
+
+% Absorption Coefficients via ""
+effAbsFloor = [0.1,0.15,0.25,0.3,0.3,0.3];
+effAbsPan = [0.11,0.4,0.7,0.74,0.88,0.89];
+effAbsWall = [0.02,0.02,0.02,0.02,0.02,0.02];
+effAbsWindow = [0.12,0.06,0.04,0.03,0.02,0.02];
+effAbsDoor = [0.35,0.39,0.44,0.49,0.54,0.57];
+effAbsCeiling = [0.45,0.7,0.8,0.8,0.65,0.45];
+effAbsBody = [0.15,0.25,0.35,0.45,0.55,0.65];
+
+% Scatter Coeffs via LLM
+effScFloor = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35];
+effScPan = [0.25, 0.35, 0.45, 0.55, 0.65, 0.75];
+effScWall = [0.05, 0.05, 0.05, 0.05, 0.05, 0.05];
+effScWindow = [0.05, 0.05, 0.05, 0.05, 0.05, 0.05];
+effScDoor = [0.05, 0.07, 0.10, 0.15, 0.20, 0.25];
+effScCeiling = [0.25, 0.35, 0.45, 0.55, 0.65, 0.75];
+effScBody = [0.3, 0.35, 0.45, 0.55, 0.6, 0.65];
+
+% STL files
 room = stlread("D:\Matlab_Projects\RayTracedAudio\STL_Files\room.stl");
 ceiling = stlread("STL_Files\ceiling.stl");
 floor = stlread("STL_Files\floor.stl");
@@ -10,20 +32,14 @@ westWall = stlread("STL_Files\westwall.stl");
 box = stlread("STL_Files\boxthing.stl");
 body = stlread("STL_Files\body.stl");
 src = audioread("Audio_Files\Clave_Mono.wav");
+
 % dimensions in meters
 % 2.6416 = y = length = 104
 % 2.9972 = z = height = 118
 % 2.8666 = x = width = 112.85 in
 
-
-
-
-%Effective absorption for entire wall instead of every object on wall
-
-
-
-%%
-% % Rescale room size to be correct
+% Only used as reference now that individual surfaces are being used
+% Rescale room size to be correct
 % % Step 1: Extract points and faces
 % points = room.Points;            
 % faces  = room.ConnectivityList;  
@@ -63,10 +79,9 @@ src = audioread("Audio_Files\Clave_Mono.wav");
 % camlight
 % lighting gouraud
 
-% % Save STL using triangulation object directly
+% Save STL using triangulation object directly
 % stlwrite(roomFinal, "room_rescaled_no_reorder.stl");
 %disp("STL saved as 'room_rescaled_no_reorder.stl'");
-%%
 
 %% Dont touch this
 function visualizeGeneralRoom(tri,txinates,rxinates)
@@ -97,8 +112,8 @@ rx = rxinates;
 scatter3(tx(1), tx(2), tx(3), 'sb', 'filled');
 scatter3(rx(1,1), rx(1,2), rx(1,3), 'sr', 'filled');
 end
-%%
 
+%% scale, position, and rotate body appropriately
 pts_body = body.Points;
 faces_body = body.ConnectivityList;
 
@@ -178,6 +193,7 @@ pts_body(:,3) = pts_body(:,3) - minZ; % ensure feet sit on floor
 % stlwrite(bodyFinal, outputPath);
 % disp("Saved transformed body STL as " + outputPath);
 
+%%
 function visualizeGeneralRoomMultiple(triList, txinates, rxinates)
 % triList = cell array of triangulation objects
 figure; hold on; axis equal; grid off;
@@ -208,15 +224,11 @@ scatter3(rxinates(1,1), rxinates(1,2), rxinates(1,3), 'sr', 'filled');
 view(3); camlight; lighting gouraud;
 end
 
-
+%% Room visualization for testing
 triList = {
     ceiling, floor, northWall, southWall, ...
     eastWall, westWall, box, bodyFinal
     };
-
-
-
-
 x = 2.1082;
 y = 2.6416;
 z = 2.9972;
@@ -244,7 +256,7 @@ floor = ceiling;
 t = [r_x,r_y,r_z];
 r = [left_x,r_y,r_z];
 %visualizeGeneralRoom(roomFinal,t,r);
-visualizeGeneralRoomMultiple(triList,t,r);
+
 
 
 % 0 deg
@@ -283,19 +295,7 @@ r = [r_x,r_y,r_z];
 t = [r_x-ft2*(sqrt(2-sqrt(2))/2),r_y-ft2*sqrt(2+sqrt(2))/2,r_z];
 r = [r_x,r_y,r_z];
 %visualizeGeneralRoom(roomFinal,t,r);
-
-
-% Absorption Coefficients
-% thin carpet over thin felt on concrete floor_A = [0.1,0.15,0.25,0.3,0.3,0.3];
-% acoustic banner wall_panel_A = [0.11,0.4,0.7,0.74,0.88,0.89];
-% painted plaster surface on masonry wall wall_drywall_A = [0.02,0.02,0.02,0.02,0.02,0.02];
-% 6mm glass wall_window_A = [0.12,0.06,0.04,0.03,0.02,0.02];
-% acoustic door wall_door_A = [0.35,0.39,0.44,0.49,0.54,0.57];
-% gypsum plaster tiles ceiling_A = [0.45,0.7,0.8,0.8,0.65,0.45];
-
-% Scatter Coeff
-% panel = [0.25, 0.35, 0.45, 0.55, 0.65, 0.75];
-% door = [0.05 0.07 0.10 0.15 0.20 0.25];
+%%
 
 
 % Room dimensions [2.1082, 2.6416,2.9667]
@@ -323,13 +323,11 @@ r = [r_x,r_y,r_z];
 % Glass area = box area
 % front wall drywall area = 6.3187 - (0.9113 + 1.0369*2) = 3.3336
 
-freq = [125,250,500,1000,2000,4000];
-numFreqs = length(freq);
 
 % Calculates the effective absorption coefficients of a surface given the
 % individual abs coeff, areas of the individual surfaces, total area of the
 % surface, and num of freq that have a corresponding coeff
-function effAbs = calcEffectiveAbsorption(alpha, areas, totalArea, numFreqs)
+function effAbs = calcEffective(alpha, areas, totalArea, numFreqs)
 areas = areas(:);
 [m, f] = size(alpha);
 
@@ -339,43 +337,77 @@ effAbs = sum(alpha .* areas, 1)./totalArea;
 end
 
 
-% Effective absorption for back wall
+%% Effective absorption for back wall
 alpha = [
-    0.11 0.4 0.7 0.74 0.88 0.89 % absorption coeff for sound panels
-    0.31 0.33 0.14 0.1 0.1 0.12 % absorption coeff for drywall
+    effAbsPan % absorption coeff for sound panels
+    effAbsWall % absorption coeff for drywall
     ];
 
 backwallAreas = [3.386, 2.9327]; % Panels, Drywall
-effAbs_backWall = calcEffectiveAbsorption(alpha,backwallAreas,backwall, numFreqs);
+effAbs_backWall = calcEffective(alpha,backwallAreas,backwall, numFreqs);
 
-% Effective absorption for left wall
+
+%% Effective absorption for left wall
 leftwallAreas = [6.2332, 1.6842]; % Panels, drywall
-effAbs_leftWall = calcEffectiveAbsorption(alpha,leftwallAreas,leftwall,numFreqs);
+effAbs_leftWall = calcEffective(alpha,leftwallAreas,leftwall,numFreqs);
 
-% Eff Abs for right wall
+
+%% Eff Abs for right wall
 rightwallAreas = [2.7211, 2.6177, 2.1522]; % Panels, drywall, door
 alpha = [
-    0.11 0.4 0.7 0.74 0.88 0.89 % absorption coeff for sound panels
-    0.31 0.33 0.14 0.1 0.1 0.12 % absorption coeff for drywall
-    0.35 0.39 0.44 0.49 0.54 0.57 % abs for acoustic door
+    effAbsPan % absorption coeff for sound panels
+    effAbsWall % absorption coeff for drywall
+    effAbsDoor % abs for acoustic door
     ];
 rightwall = 7.491; % adjusted for box taking up space
-effAbs_rightwall = calcEffectiveAbsorption(alpha,rightwallAreas,rightwall,numFreqs);
+effAbs_rightwall = calcEffective(alpha,rightwallAreas,rightwall,numFreqs);
 
-% Eff Abs for front wall
+
+%% Eff Abs for front wall
 frontwallAreas = [1.0369, 0.9113, 3.3336]; % window, door, drywall
 alpha = [
-    [0.12 0.06 0.04 0.03 0.02 0.02]
-    [0.35 0.39 0.44 0.49 0.54 0.57]
-    [0.02 0.02 0.02 0.02 0.02 0.02]
+    effAbsWindow
+    effAbsDoor
+    effAbsWall
     ];
 frontwall = backwall - 1.0369; %Adjusted for box
-effAbsfrontwall = calcEffectiveAbsorption(alpha,frontwallAreas,frontwall,numFreqs);
+effAbsfrontwall = calcEffective(alpha,frontwallAreas,frontwall,numFreqs);
 
-effAbsfloor = [0.1,0.15,0.25,0.3,0.3,0.3];
-
-effAbsceiling = [0.45,0.7,0.8,0.8,0.65,0.45];
+%%
 
 % Via LLM
 % Scattering coeffs for materials
 % effScFloor = [0.1,0.15,0.2,0.25,0.3,0.35]
+% effScCeiling = [0.25,0.35,0.45,0.55,0.65,0.75]
+% Effective Scattering coeffs can be calculated same as absorption
+
+%% Effective scattering for back wall
+alpha = [
+    effScPan % Scatter coeff for sound panels
+    effScWall % Scatter coeff for drywall
+    ];
+
+backwallAreas = [3.386, 2.9327]; % Panels, Drywall
+effSc_backWall = calcEffective(alpha,backwallAreas,backwall, numFreqs);
+
+%% Effective scatter for left wall
+effSc_leftWall = calcEffective(alpha,leftwallAreas,leftwall,numFreqs);
+
+%% Eff scatter for right wall
+
+alpha = [
+    effScPan % absorption coeff for sound panels
+    effScWall % absorption coeff for drywall
+    effScDoor % abs for acoustic door
+    ];
+
+effSc_rightwall = calcEffective(alpha,rightwallAreas,rightwall,numFreqs);
+
+%% Eff scatter for front wall
+alpha = [
+    effScWindow
+    effScDoor
+    effScWall
+    ];
+
+effSc_frontWall = calcEffective(alpha,frontwallAreas,frontwall,numFreqs);
